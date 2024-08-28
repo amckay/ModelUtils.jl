@@ -1,3 +1,6 @@
 
 .DS_Store
-dynare/
+dynare/+*
+dynare/*.log
+dynare/ThreeEqNK/*
+dynare/ConvexAdjCost/*

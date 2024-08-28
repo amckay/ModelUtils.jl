@@ -74,6 +74,7 @@ p = plot(IRFMat,m,shock = :Ainnov)
 display(p)
 
 # Compare to Dynare
+println("Comparing to Dynare output: for these tests to work you need to run Dynare on the files in the dynare directory first")
 shock_number = 1;
 shock_horizon = 0;
 IRFs = contemp(IRFMat[:,(shock_number-1)*m.T+shock_horizon+1],m);

@@ -74,7 +74,8 @@ IRFMat = linearIRFs(f,m);
 p = plot(IRFMat,m,shock = :costpushinnov)
 display(p)
 
-# Compare to Dynare
+#---- Compare to Dynare ----
+println("Comparing to Dynare output: for these tests to work you need to run Dynare on the files in the dynare directory first")
 shock_number = 2;
 shock_horizon = 0;
 IRFs = contemp(IRFMat[:,(shock_number-1)*m.T+shock_horizon+1],m);
