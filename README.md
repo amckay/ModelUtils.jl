@@ -9,6 +9,10 @@ A model environment is created by calling the `ModelEnvironment` constructor wit
 * `T` -- the length of the transition path
 * `ss` -- a dictionary of steady states. At a minimum, the dictionary contains the key `"initial"` giving the initial steady state. It may optionally also include `"terminal"` giving the terminal steady state. If a terminal steady state is not supplied, we assume the system returns to the initial steady state.
 
+## Quick start
+
+See `RBC.jl` for a minimal example of usage.
+
 ## Endogenous and exogenous variables  
 
 The model variables are stored in the vectors `X` and `E` and we want to be able to easibly reference specific parts of these vectors. Suppose we have three endogenous variables: `y`, `p`, and `i`, we then define a data type `Vars` to identify our endogeous variables using the macro
@@ -55,7 +59,7 @@ where $X_2$ are $T$ policy instruments. Here, you must also supply functions tha
 
 ## Results and plotting
 
-The IRF results are produced in a vector `X`. It is useful to partition these by calling `IRFs = contemp(X,m).` You may then plot the results `plot(IRFs,m)`
+The IRF results are produced in a vector `X`. You may then plot the results `plot(X,m)`.
 
 ## Summary
 
