@@ -11,7 +11,7 @@ A model environment is created by calling the `ModelEnvironment` constructor wit
 
 ## Endogenous and exogenous variables  
 
-The model variables are stored in the vectors `X` and `E` and we want to be able to easibly reference specific parts of these vectors. We define a data type `Vars` to identify our endogeous variables using the macro
+The model variables are stored in the vectors `X` and `E` and we want to be able to easibly reference specific parts of these vectors. Suppose we have three endogenous variables: `y`, `p`, and `i`, we then define a data type `Vars` to identify our endogeous variables using the macro
 
 ```julia
 @endogenousvariables y p i
@@ -31,13 +31,12 @@ We similarly define exogenous variables and reference them with `exogenous(E,m)`
 @unpack z = exogenous(E,m)
 ```
 
-The macros `@endogenousvariables` and `@exogenousvariables` add entries to a dictionary `vardict` which we pass when constructing the model environment.
 
 ### Leads and lags
 
 `@endogenousvariables` automatically constructs data types that allow us to reference leads and lags of our endogenous variables. We do so with `@unpack y_l = lag(X,m)`.  A lag prepends the steady state value and then omits the last element of the transition.  A lead can be accessed with `@unpack y_p = lead(X,m)`. 
 
-If you want to access higher-order lags and leads, you need to add these to `vardict`. For example, if you want to reference variables from date t-2 in the equation for date t you use `@addlaglead -2 y p i`. Here, the first expression is an integer saying what lag or lead we are adding. The remaining arguments are the names of the endogenous variables (all of them). Then to reference these data you use `@unpack y_l2 = lag(X,m,-2)`.   See `ConvexAdjustCost.jl` for an example.
+If you want to access higher-order lags and leads, you need to prepare for this in setting up the model environment. For example, if you want to reference variables from date t-2 in the equation for date t you use `@addlaglead -2 y p i`. Here, the first expression is an integer saying what lag or lead we are adding. The remaining arguments are the names of the endogenous variables (all of them). Then to reference these data you use `@unpack y_l2 = lag(X,m,-2)`.   See `ConvexAdjustCost.jl` for an example.
 
 ## Solving functions
 
@@ -50,8 +49,8 @@ $$
 * `nonlineartransition` -- solves for $X$ such that $f(X,E) = 0$ using Newton's method.
 * `optimaltransitionpath` -- here `f` should be the "private sector" block and represent $n-1$ equations. The method solves
 $\max_X \; U(X_1,E) \quad s.t. \quad f(X_1,X_2,E) = 0,$ 
-where $X_2$ are $T$ policy instruments.
-* `optimalLQpolicy` -- similar to `optimaltransitionpath` but assumes that the Hessian of $U$ and the Jacobian of $f$ are constant as they are in a linear-quadratic problem.
+where $X_2$ are $T$ policy instruments. Here, you must also supply functions that evaluate the gradient and Hessian of the objective function $U$. See `OptimalPolicy_nonlinear.jl` for an example.
+* `optimalLQpolicy` -- similar to `optimaltransitionpath` but assumes that the Hessian of $U$ and the Jacobian of $f$ are constant as in a linear-quadratic problem.
 
 
 ## Results and plotting
