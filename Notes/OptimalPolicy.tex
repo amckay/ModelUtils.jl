@@ -1,0 +1,75 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb,amsmath,fullpage,setspace}
+\linespread{1.5}
+
+\title{Optimal Policy in the Sequence Space}
+\author{Alisdair McKay}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+Let $X$ be an $n_XT$ vector of endogenous variables. Let $\varepsilon$ be an $n_\varepsilon T$ vector of exogenous variables. 
+ Our model will be represented as $f(X,\varepsilon)=0$. We partition $X$ into $[Y' \quad Z']'$ where $Z$ are policy instruments. Our objective function is $U(Y,\varepsilon)$. It is w.l.o.g. to omit $Z$ from $U$ because we can define an auxiliary variable  $Y_k = Z$.  The Lagrangian is
+\begin{align*}
+	\mathcal L = U(Y,\varepsilon) - \lambda' f(Y,Z,\varepsilon)
+\end{align*}
+and the FOCs are
+\begin{align*}
+U_Y' &=\lambda' f_Y \\	
+0 &=\lambda' f_Z 
+\end{align*}
+Combining the two FOCs we have 
+\[0 = U_Y' f_Y^{-1} f_Z .\]
+
+Define $U_X' = [U_Y' \quad 0]'$ as $U$ does not depend on $Z$, define $f_X = [f_Y \quad f_Z]$, and define $\Theta = -f_X^{-1} f_Z$ as the casual effects of the policy instruments on $X$. Transposing the FOCs we arrive at the policy criterion
+	\[ \Theta' U_X =0.\]
+We assume we can compute $U_X$. Computing $\Theta$ can require some care (see below). But suppose we have $\Theta$, then we have form the system
+\begin{align*}
+	\begin{pmatrix}
+		f(X,\varepsilon) \\
+		\Theta(X,\varepsilon)' U_X(X,\varepsilon)
+	\end{pmatrix}
+	=0.
+\end{align*}
+We solve the system above using Newton's method. For computational tractability we do not differentiate $\Theta$ in the Newton step. So the update is
+\begin{align*}
+	X^{(j+1)}
+=
+	X^{(j)}
+	-
+		\begin{pmatrix}
+		f_X^{(j)}  \\
+		{\Theta^{(j)}}' U_{XX}^{(j)} 
+	\end{pmatrix}^{-1}
+	\begin{pmatrix}
+		f^{(j)} \\
+		{\Theta^{(j)}}'U_X^{(j)}
+	\end{pmatrix}.
+\end{align*}
+
+
+
+Suppose you specify the model such that policy instruments are simply exogenous. It will likely then turn out that $f_X$ is not invertible and one cannot form $\Theta$ using $f_X^{-1}$. In practice, we specify the model so that the policy instrument is set according to a rule subject to shocks. So the model is now
+\[F(X,\varepsilon) \equiv \begin{pmatrix}
+f(X,\varepsilon)\\
+g(X,\nu) 	
+ \end{pmatrix}
+ = 0\]
+where $g$ is a policy rule and $\nu$ are policy shocks. We then have the total derivative (assuming $d\varepsilon = 0$)
+\[F_X dX + F_\nu d\nu = 0\]
+leading to
+\[
+\frac{dX}{d\nu}
+=	F_X^{-1}
+F_\nu.
+\]
+Define $\tilde \Theta = \frac{dX}{d\nu}$, which are the causal effects of the policy \emph{shocks}.  Define $M = \frac{dZ}{d\nu}$ which are the effects of the shocks on the policy instruments ($M$ is the lower $T\times T$ block of $\tilde \Theta$). Note $\tilde \Theta =  \frac{dX}{dZ} \frac{dZ}{d\nu} = \Theta M$.
+
+We will impose the policy criterion $\tilde \Theta' U_X  = M' \Theta' U_X  = 0$ instead of $\Theta' U_X = 0$. If $M$ is full rank, then the two are the same. If $M$ is not full rank, it could be the case that we are in the null space of $M'$ and we have not imposed the first-order conditions with respect to the choices of the policy instruments.  
+
+
+In practice, $M$ can be slightly rank deficient without causing a problem. The main reason that $M$ is rank deficient in monetary models is the forward guidance puzzle. We can devise a path of policy shocks that perturbs $i_T$ by some tiny $\varepsilon$ that endogenously pushes down inflation by much larger amounts at earlier dates. We then can offset these endogenous policy changes with positive policy shocks.  It ends up looking like a path of policy shocks that has no effect on the policy instrument and this dimension of the column space of $M$ maps to zero. If  $\Theta' U_X$ is that we have a very particular failure of the FOCs in the null space of $M'$.
+
+
+\end{document}
