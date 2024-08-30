@@ -42,6 +42,10 @@ We similarly define exogenous variables and reference them with `exogenous(E,m)`
 
 If you want to access higher-order lags and leads, you need to prepare for this in setting up the model environment. For example, if you want to reference variables from date t-2 in the equation for date t you use `@addlaglead -2 y p i`. Here, the first expression is an integer saying what lag or lead we are adding. The remaining arguments are the names of the endogenous variables (all of them). Then to reference these data you use `@unpack y_l2 = lag(X,m,-2)`.   See `ConvexAdjustCost.jl` for an example.
 
+## Specifying model equations
+
+Consider the example model equation $y = p + i$. We will want to enter this in the form $f(X)=0$ so $-y + p + i = 0$. When the code evaluates the left hand side of this equation, each variable will be a vector of length $T$. Therefor we need to tell Julia to use vectorized operations by including dots before each operator. So we could write `-y .+ p .+ i`.  Alternatively, we could just include the broadcast macro `@.` at the beginning and let Julia apply all the vectorized operations. In that case we write `@. -y + p + i`.
+
 ## Solving functions
 
 There are three functions for solving the model
@@ -60,6 +64,8 @@ where $X_2$ are $T$ policy instruments. Here, you must also supply functions tha
 ## Results and plotting
 
 The IRF results are produced in a vector `X`. You may then plot the results `plot(X,m)`.
+
+
 
 ## Summary
 

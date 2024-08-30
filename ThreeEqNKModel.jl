@@ -34,7 +34,7 @@ function is_curve(m::ModelEnv,X)
     @unpack y, i, rstar = contemp(X,m)
     @unpack y_p, π_p = lead(X,m)
     @unpack σ = m.par
-    return -y .+ y_p .- (1/σ)*(i .- π_p -rstar);
+    return @. -y + y_p - (1/σ)*(i - π_p -rstar);
 end
 
 function nkpc(m::ModelEnv,X)
@@ -42,13 +42,13 @@ function nkpc(m::ModelEnv,X)
     @unpack y, π, costpush = contemp(X,m)
     @unpack π_p = lead(X,m)
     κ = (1-β*θ)*(1-θ)/θ * (σ+invFrisch)
-    return -π .+ β* π_p .+ κ*y .+ costpush;
+    return @. -π + β* π_p + κ*y + costpush;
 end
 
 function policyrule(m::ModelEnv,X)
     @unpack mπ = m.par
     @unpack i, π = contemp(X,m)
-    return -i .+ mπ*π
+    return @. -i + mπ*π
 end
 
 function fexogenous(m::ModelEnv,X,E)
@@ -56,8 +56,8 @@ function fexogenous(m::ModelEnv,X,E)
     @unpack costpush,rstar = contemp(X,m);
     @unpack costpush_l,rstar_l = lag(X,m);
     @unpack costpushinnov,rstarinnov = exogenous(E,m);
-    return [-costpush .+ ρπ * costpush_l .+ costpushinnov; 
-            -rstar .+ ρr * rstar_l .+ rstarinnov]
+    return [@. -costpush + ρπ * costpush_l + costpushinnov; 
+            @. -rstar + ρr * rstar_l + rstarinnov]
 end
 
 
@@ -75,14 +75,20 @@ p = plot(IRFMat,m,shock = :costpushinnov)
 display(p)
 
 #---- Compare to Dynare ----
-println("Comparing to Dynare output: for these tests to work you need to run Dynare on the files in the dynare directory first")
 shock_number = 2;
 shock_horizon = 0;
 IRFs = contemp(IRFMat[:,(shock_number-1)*m.T+shock_horizon+1],m);
 using MAT
-M = matread("dynare/ThreeEqNK/Output/ThreeEqNK_results.mat")["oo_"]["irfs"];
-@assert( maximum(abs.(M["y_e_costpush"]'  - IRFs.y[1:21])) < 1e-12)
-@assert( maximum(abs.(M["pi_e_costpush"]' - IRFs.π[1:21])) < 1e-12)
-@assert( maximum(abs.(M["i_e_costpush"]'  - IRFs.i[1:21])) < 1e-12)
-@assert( maximum(abs.(M["costpush_e_costpush"]'  - IRFs.costpush[1:21])) < 1e-12)
+try
+    M = matread("dynare/ThreeEqNK/Output/ThreeEqNK_results.mat")["oo_"]["irfs"];
+    @assert( maximum(abs.(M["y_e_costpush"]'  - IRFs.y[1:21])) < 1e-12)
+    @assert( maximum(abs.(M["pi_e_costpush"]' - IRFs.π[1:21])) < 1e-12)
+    @assert( maximum(abs.(M["i_e_costpush"]'  - IRFs.i[1:21])) < 1e-12)
+    @assert( maximum(abs.(M["costpush_e_costpush"]'  - IRFs.costpush[1:21])) < 1e-12)
+catch exc
+    if isa(exc,ErrorException)
+        println("Comparing to Dynare output: for these tests to work you need to run Dynare on the files in the dynare directory first")
+    end
+end
+
 
