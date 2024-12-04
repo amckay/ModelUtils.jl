@@ -18,6 +18,7 @@ struct ModelEnv
     ss::Dict{String,Vector{Float64}}
     nx::Int
     nexog::Int
+    ss_sym::Dict{String,AbstractArray}
 end
 
 function ModelEnv(;par,vars::Dict{Any,DataType},steadystate::Dict{String,Vector{Float64}},T::Int)
@@ -36,7 +37,8 @@ function ModelEnv(;par,vars::Dict{Any,DataType},steadystate::Dict{String,Vector{
         error("Exogenous steady state is wrong size. Don't put commas in the variable list.")
     end
 
-    ModelEnv(par,vars,T,steadystate,nx,nexog)
+    ss_sym = Dict{String,AbstractArray}(); # this is used for non-linear optimal policy calculations, we can populate it later
+    ModelEnv(par,vars,T,steadystate,nx,nexog,ss_sym)
 end
 
 
@@ -199,6 +201,10 @@ end
 function lagshift(x,m::ModelEnv,j::Int)
     return [[repeat( [m.ss["initial"][i]] ,j); xi[1:end-j]]  for (i,xi) in enumerate(x)]
 end
+"""Take a vector x of vectors xi and lag each one by prepending the steady state value"""
+function lagshift(x::Vector{Symbolics.Arr{Num, 1}},m::ModelEnv)
+    return [[m.ss_sym["initial"][i]; xi[1:end-1]]  for (i,xi) in enumerate(x)]
+end
 """Take a vector x of vectors xi and lead each one by shifting and appending the steady state value"""
 function leadshift(x,m::ModelEnv)
     return [[xi[2:end]; m.ss["terminal"][i]]  for (i,xi) in enumerate(x)]
@@ -206,6 +212,10 @@ end
 """Take a vector x of vectors xi and lead each one j times by shifting and appending the steady state value"""
 function leadshift(x,m::ModelEnv,j::Int)
     return [[xi[j+1:end]; repeat( [m.ss["terminal"][i]] ,j)]  for (i,xi) in enumerate(x)]
+end
+"""Take a vector x of vectors xi and lead each one by shifting and appending the steady state value"""
+function leadshift(x::Vector{Symbolics.Arr{Num, 1}},m::ModelEnv)
+    return [[xi[2:end]; m.ss_sym["terminal"][i]]  for (i,xi) in enumerate(x)]
 end
 
 """Take an n * T vector and reshape it to n vectors of length T"""
@@ -381,7 +391,10 @@ function _getlamfhessian(f,m,X,E,lam)
     nf = m.nx-1;
 
     Tsym = 5;
-    @variables xs[1:nx*Tsym] lams[1:nf*Tsym] es[1:nexog*Tsym]
+    @variables xs[1:nx*Tsym] lams[1:nf*Tsym] es[1:nexog*Tsym] ssinit[1:nx] ssterm[1:nx]
+    m.ss_sym["initial"] = ssinit
+    m.ss_sym["terminal"] = ssterm
+
     H = Symbolics.hessian(sum(lams .* f(m,xs,es)),[xs...])
 
    
@@ -392,6 +405,7 @@ function _getlamfhessian(f,m,X,E,lam)
     Ewide = reshape(E,:,nexog);
 
     myconvert(n::Num) = Float64(n.val);
+    myconvert(n::Real) = n;
     for t = 2:T-1
         if t == 2
             ll = reshape([zeros(1,nf) ; lamwide[1:t+2,:]],:);

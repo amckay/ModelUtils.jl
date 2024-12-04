@@ -13,10 +13,6 @@ A model environment is created by calling the `ModelEnvironment` constructor wit
 
 See `RBC.jl` for a minimal example of usage.
 
-## Julia version compatibility
-
-I recently upgraded to Julia 1.11 and noticed that the optimal policy calculation no longer works. I will try to fix that soon. In the meantime, I have been using Julia 1.9.4.
-
 ## Endogenous and exogenous variables  
 
 The model variables are stored in the vectors `X` and `E` and we want to be able to easibly reference specific parts of these vectors. Suppose we have three endogenous variables: `y`, `p`, and `i`, we then define a data type `Vars` to identify our endogeous variables using the macro
