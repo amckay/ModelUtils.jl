@@ -91,15 +91,15 @@ end
 
 
 """Check that the equations hold in steady state"""
-function checksteadystate(m::ModelEnv,f)
-    if any(abs.(m.ss["terminal"] .- m.ss["initial"]) .> 1e-6)
+function checksteadystate(m::ModelEnv,f;tol=1e-6)
+    if any(abs.(m.ss["terminal"] .- m.ss["initial"]) .> tol)
         @warn "Cannot use checksteadystate when initial and terminal steady states are different"
         return
     end
     X, E = longsteadystate(m);
     res = f(m,X,E);
-    if ~all(isapprox.(res, 0., atol=1e-6))
-        println("Residuals in equations =$(findall(abs.( reshape(res,m.T,:)[1,:] )  .> 1e-6))")
+    if ~all(isapprox.(res, 0., atol=tol))
+        println("Residuals in equations = $(findall(abs.( reshape(res,m.T,:)[1,:] )  .> tol)) ")
         error("Steady state does not hold")
     end
 
