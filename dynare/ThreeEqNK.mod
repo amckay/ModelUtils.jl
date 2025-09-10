@@ -9,7 +9,7 @@ parameters beta, theta, sigma, rho,mpi, invFrisch,kappa;
 beta = 0.995;    
 sigma = 1.0;  
 invFrisch = 0.;
-theta = 0.1; 
+theta = 0.9; 
 mpi = 1.5; 
 rho = 0.8;
 

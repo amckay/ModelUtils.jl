@@ -8,7 +8,7 @@ using Parameters, SparseArrays, ModelUtils
     β = 0.995;    
     σ = 1.0;  # CRRA
     invFrisch = 0.; #inverse inverse Frisch elasticity
-    θ = 0.1;  # 1 - prob price change
+    θ = 0.9;  # 1 - prob price change
     η = 6.0; # elasticity of subs between varieties
     mπ = 1.5; # Interest rate rule response to inflation
     ρπ = 0.8; # persistence of cost push shock
