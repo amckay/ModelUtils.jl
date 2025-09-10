@@ -51,9 +51,7 @@ Consider the example model equation $y = p + i$. We will want to enter this in t
 There are three functions for solving the model
 
 * `linearIRFs` -- produces IRFs for a linearized version of the model akin to a first-order perturbation solution
-$$
-f_X dX + f_E dE = 0 \quad \Rightarrow \quad \frac{dX}{dE} = - f_X^{-1} f_E
-$$
+$$f_X dX + f_E dE = 0 \quad \Rightarrow \quad \frac{dX}{dE} = - f_X^{-1} f_E$$
 * `nonlineartransition` -- solves for $X$ such that $f(X,E) = 0$ using Newton's method.
 * `optimaltransitionpath` -- here `f` should be the "private sector" block and represent $n-1$ equations. The method solves
 $\max_X \; U(X_1,E) \quad s.t. \quad f(X_1,X_2,E) = 0,$ 
