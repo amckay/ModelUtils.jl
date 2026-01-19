@@ -2,7 +2,7 @@ module ModelUtils
 
 using ForwardDiff, Plots, SparseArrays
 import Plots: plot
-using LinearAlgebra: rank
+using LinearAlgebra: rank, dot
 using Symbolics
 using Parameters
 
@@ -395,7 +395,11 @@ function _getlamfhessian(f,m,X,E,lam)
     m.ss_sym["initial"] = ssinit
     m.ss_sym["terminal"] = ssterm
 
-    H = Symbolics.hessian(sum(lams .* f(m,xs,es)),[xs...])
+    xv = Symbolics.scalarize(xs)      # gives a plain Vector of scalar Num's
+    lamv = Symbolics.scalarize(lams)
+    ev =  Symbolics.scalarize(es)
+    H  = Symbolics.hessian(dot(lamv , f(m,xv,ev)), xv)
+    H  = Symbolics.simplify.(H) 
 
    
     HH = zeros(nx*T,nx*T);
@@ -404,8 +408,7 @@ function _getlamfhessian(f,m,X,E,lam)
     Xwide = reshape(X,:,nx);
     Ewide = reshape(E,:,nexog);
 
-    myconvert(n::Num) = Float64(n.val);
-    myconvert(n::Real) = n;
+    Hfun = Symbolics.build_function(H,xv,lamv,ev; expression=Val(false))[1];
     for t = 2:T-1
         if t == 2
             ll = reshape([zeros(1,nf) ; lamwide[1:t+2,:]],:);
@@ -421,12 +424,12 @@ function _getlamfhessian(f,m,X,E,lam)
             ee = reshape(Ewide[t-2:t+2,:],:);
         end
         
-        Htemp = Symbolics.substitute(H,Dict(xs=>xx,lams=>ll,es=>ee));
+        Htemp = Hfun(xx,ll,ee);
         for i = 1:nx
             ofsi = (i-1)*T;
             for j = 1:nx
                 ofsj = (j-1)*T;
-                HH[ofsi .+ (t-1:t+1),ofsj .+ (t-1:t+1)] = myconvert.(Htemp[(i-1)*Tsym.+(2:4),(j-1)*Tsym.+(2:4)]);
+                HH[ofsi .+ (t-1:t+1),ofsj .+ (t-1:t+1)] = Htemp[(i-1)*Tsym.+(2:4),(j-1)*Tsym.+(2:4)];
             end
         end
 
