@@ -399,7 +399,6 @@ function _getlamfhessian(f,m,X,E,lam)
     lamv = Symbolics.scalarize(lams)
     ev =  Symbolics.scalarize(es)
     H  = Symbolics.hessian(dot(lamv , f(m,xv,ev)), xv)
-    H  = Symbolics.simplify.(H) 
 
    
     HH = zeros(nx*T,nx*T);
